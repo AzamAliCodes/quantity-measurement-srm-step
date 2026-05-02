@@ -1,7 +1,7 @@
 public class QuantityMeasurementApp {
 
     public enum Unit {
-        FEET(12.0), INCH(1.0);
+        FEET(12.0), INCH(1.0), YARD(36.0), CM(0.393701);
 
         public final double conversionFactor;
 
@@ -24,8 +24,8 @@ public class QuantityMeasurementApp {
             if (this == obj) return true;
             if (obj == null || !(obj instanceof Quantity)) return false;
             Quantity that = (Quantity) obj;
-            return Double.compare(this.value * this.unit.conversionFactor, 
-                                  that.value * that.unit.conversionFactor) == 0;
+            return Math.abs(this.value * this.unit.conversionFactor - 
+                            that.value * that.unit.conversionFactor) < 1e-6;
         }
 
         @Override
@@ -35,14 +35,16 @@ public class QuantityMeasurementApp {
     }
 
     public static void main(String[] args) {
-        System.out.println("Starting UC3: Generic Quantity Class for DRY Principle");
+        System.out.println("Starting UC4: Extended Unit Support");
 
-        Quantity oneFoot = new Quantity(1.0, Unit.FEET);
-        Quantity twelveInches = new Quantity(12.0, Unit.INCH);
+        Quantity oneYard = new Quantity(1.0, Unit.YARD);
+        Quantity threeFeet = new Quantity(3.0, Unit.FEET);
+        System.out.println("Test 1.0 yd == 3.0 ft: " + oneYard.equals(threeFeet));
 
-        System.out.println("Test 1.0 ft == 12.0 in: " + oneFoot.equals(twelveInches));
-        System.out.println("Test 1.0 ft != 1.0 in: " + !oneFoot.equals(new Quantity(1.0, Unit.INCH)));
+        Quantity oneCm = new Quantity(1.0, Unit.CM);
+        Quantity pointThreeNineInches = new Quantity(0.393701, Unit.INCH);
+        System.out.println("Test 1.0 cm == 0.393701 in: " + oneCm.equals(pointThreeNineInches));
 
-        System.out.println("UC3 Verification Complete.");
+        System.out.println("UC4 Verification Complete.");
     }
 }
