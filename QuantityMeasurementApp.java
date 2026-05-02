@@ -15,6 +15,8 @@ public class QuantityMeasurementApp {
         private final Unit unit;
 
         public Quantity(double value, Unit unit) {
+            if (unit == null) throw new IllegalArgumentException("Unit cannot be null");
+            if (!Double.isFinite(value)) throw new IllegalArgumentException("Value must be finite");
             this.value = value;
             this.unit = unit;
         }
@@ -28,6 +30,11 @@ public class QuantityMeasurementApp {
                             that.value * that.unit.conversionFactor) < 1e-6;
         }
 
+        public Quantity convertTo(Unit targetUnit) {
+            double convertedValue = (this.value * this.unit.conversionFactor) / targetUnit.conversionFactor;
+            return new Quantity(convertedValue, targetUnit);
+        }
+
         @Override
         public String toString() {
             return value + " " + unit;
@@ -35,16 +42,13 @@ public class QuantityMeasurementApp {
     }
 
     public static void main(String[] args) {
-        System.out.println("Starting UC4: Extended Unit Support");
+        System.out.println("Starting UC5: Unit-to-Unit Conversion");
 
-        Quantity oneYard = new Quantity(1.0, Unit.YARD);
-        Quantity threeFeet = new Quantity(3.0, Unit.FEET);
-        System.out.println("Test 1.0 yd == 3.0 ft: " + oneYard.equals(threeFeet));
+        Quantity oneFoot = new Quantity(1.0, Unit.FEET);
+        Quantity twelveInches = oneFoot.convertTo(Unit.INCH);
+        System.out.println("Converted 1.0 ft to inches: " + twelveInches);
+        System.out.println("Test 1.0 ft == 12.0 in: " + oneFoot.equals(twelveInches));
 
-        Quantity oneCm = new Quantity(1.0, Unit.CM);
-        Quantity pointThreeNineInches = new Quantity(0.393701, Unit.INCH);
-        System.out.println("Test 1.0 cm == 0.393701 in: " + oneCm.equals(pointThreeNineInches));
-
-        System.out.println("UC4 Verification Complete.");
+        System.out.println("UC5 Verification Complete.");
     }
 }
