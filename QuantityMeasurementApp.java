@@ -1,60 +1,48 @@
 public class QuantityMeasurementApp {
 
-    public static class Feet {
-        private final double value;
+    public enum Unit {
+        FEET(12.0), INCH(1.0);
 
-        public Feet(double value) {
-            this.value = value;
-        }
+        public final double conversionFactor;
 
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            Feet feet = (Feet) obj;
-            return Double.compare(feet.value, value) == 0;
-        }
-
-        @Override
-        public String toString() {
-            return value + " ft";
+        Unit(double conversionFactor) {
+            this.conversionFactor = conversionFactor;
         }
     }
 
-    public static class Inches {
+    public static class Quantity {
         private final double value;
+        private final Unit unit;
 
-        public Inches(double value) {
+        public Quantity(double value, Unit unit) {
             this.value = value;
+            this.unit = unit;
         }
 
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            Inches inches = (Inches) obj;
-            return Double.compare(inches.value, value) == 0;
+            if (obj == null || !(obj instanceof Quantity)) return false;
+            Quantity that = (Quantity) obj;
+            return Double.compare(this.value * this.unit.conversionFactor, 
+                                  that.value * that.unit.conversionFactor) == 0;
         }
 
         @Override
         public String toString() {
-            return value + " in";
+            return value + " " + unit;
         }
     }
 
     public static void main(String[] args) {
-        System.out.println("Starting UC2: Feet and Inches measurement equality");
+        System.out.println("Starting UC3: Generic Quantity Class for DRY Principle");
 
-        Feet f1 = new Feet(1.0);
-        Feet f2 = new Feet(1.0);
-        System.out.println("Test 1.0 ft == 1.0 ft: " + f1.equals(f2));
+        Quantity oneFoot = new Quantity(1.0, Unit.FEET);
+        Quantity twelveInches = new Quantity(12.0, Unit.INCH);
 
-        Inches i1 = new Inches(1.0);
-        Inches i2 = new Inches(1.0);
-        System.out.println("Test 1.0 in == 1.0 in: " + i1.equals(i2));
+        System.out.println("Test 1.0 ft == 12.0 in: " + oneFoot.equals(twelveInches));
+        System.out.println("Test 1.0 ft != 1.0 in: " + !oneFoot.equals(new Quantity(1.0, Unit.INCH)));
 
-        System.out.println("Test 1.0 ft != 1.0 in: " + !f1.equals(i1));
-
-        System.out.println("UC2 Verification Complete.");
+        System.out.println("UC3 Verification Complete.");
     }
 }
