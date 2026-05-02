@@ -45,6 +45,24 @@ public class QuantityMeasurementApp {
         @Override public String getUnitName() { return name(); }
     }
 
+    public enum TemperatureUnit implements IMeasurable {
+        CELSIUS(1.0, 0.0), 
+        FAHRENHEIT(5.0/9.0, 32.0);
+
+        private final double scale;
+        private final double offset;
+
+        TemperatureUnit(double scale, double offset) {
+            this.scale = scale;
+            this.offset = offset;
+        }
+
+        @Override public double toBaseUnit(double value) { return (value - offset) * scale; }
+        @Override public double fromBaseUnit(double valueInBase) { return (valueInBase / scale) + offset; }
+        @Override public double getConversionFactor() { return scale; }
+        @Override public String getUnitName() { return name(); }
+    }
+
     public static class Quantity<U extends IMeasurable> {
         private final double value;
         private final U unit;
@@ -99,12 +117,6 @@ public class QuantityMeasurementApp {
             return new Quantity<>(diffInTargetUnit, targetUnit);
         }
 
-        public double divide(Quantity<U> other) {
-            if (other == null) throw new IllegalArgumentException("Operand cannot be null");
-            if (other.value == 0) throw new ArithmeticException("Division by zero");
-            return this.unit.toBaseUnit(this.value) / other.unit.toBaseUnit(other.value);
-        }
-
         @Override
         public String toString() {
             return String.format("%.2f %s", value, unit.getUnitName());
@@ -112,18 +124,16 @@ public class QuantityMeasurementApp {
     }
 
     public static void main(String[] args) {
-        System.out.println("Starting UC12: Subtraction and Division Operations on Quantity Measurements");
+        System.out.println("Starting UC13: Centralized Arithmetic Logic to Enforce DRY in Quantity Operations");
 
-        Quantity<LengthUnit> oneFoot = new Quantity<>(1.0, LengthUnit.FEET);
-        Quantity<LengthUnit> sixInches = new Quantity<>(6.0, LengthUnit.INCH);
+        Quantity<TemperatureUnit> boilingF = new Quantity<>(212.0, TemperatureUnit.FAHRENHEIT);
+        Quantity<TemperatureUnit> boilingC = new Quantity<>(100.0, TemperatureUnit.CELSIUS);
+        System.out.println("212.0 F == 100.0 C: " + boilingF.equals(boilingC));
 
-        System.out.println("1 foot - 6 inches = " + oneFoot.subtract(sixInches));
-        System.out.println("Test 1 foot / 6 inches: " + oneFoot.divide(sixInches));
+        Quantity<TemperatureUnit> freezingF = new Quantity<>(32.0, TemperatureUnit.FAHRENHEIT);
+        Quantity<TemperatureUnit> freezingC = new Quantity<>(0.0, TemperatureUnit.CELSIUS);
+        System.out.println("32.0 F == 0.0 C: " + freezingF.equals(freezingC));
 
-        Quantity<VolumeUnit> oneGallon = new Quantity<>(1.0, VolumeUnit.GALLON);
-        Quantity<VolumeUnit> oneLiter = new Quantity<>(1.0, VolumeUnit.LITER);
-        System.out.println("1 gallon - 1 liter = " + oneGallon.subtract(oneLiter));
-
-        System.out.println("UC12 Verification Complete.");
+        System.out.println("UC13 Verification Complete.");
     }
 }
