@@ -35,6 +35,13 @@ public class QuantityMeasurementApp {
             return new Quantity(convertedValue, targetUnit);
         }
 
+        public Quantity add(Quantity other) {
+            if (other == null) throw new IllegalArgumentException("Operand cannot be null");
+            double sumInInches = (this.value * this.unit.conversionFactor) + (other.value * other.unit.conversionFactor);
+            double sumInThisUnit = sumInInches / this.unit.conversionFactor;
+            return new Quantity(sumInThisUnit, this.unit);
+        }
+
         @Override
         public String toString() {
             return value + " " + unit;
@@ -42,13 +49,14 @@ public class QuantityMeasurementApp {
     }
 
     public static void main(String[] args) {
-        System.out.println("Starting UC5: Unit-to-Unit Conversion");
+        System.out.println("Starting UC6: Addition of Two Length Units");
 
         Quantity oneFoot = new Quantity(1.0, Unit.FEET);
-        Quantity twelveInches = oneFoot.convertTo(Unit.INCH);
-        System.out.println("Converted 1.0 ft to inches: " + twelveInches);
-        System.out.println("Test 1.0 ft == 12.0 in: " + oneFoot.equals(twelveInches));
+        Quantity twelveInches = new Quantity(12.0, Unit.INCH);
 
-        System.out.println("UC5 Verification Complete.");
+        System.out.println("1 foot + 12 inches = " + oneFoot.add(twelveInches));
+        System.out.println("Test sum == 2.0 ft: " + oneFoot.add(twelveInches).equals(new Quantity(2.0, Unit.FEET)));
+
+        System.out.println("UC6 Verification Complete.");
     }
 }
