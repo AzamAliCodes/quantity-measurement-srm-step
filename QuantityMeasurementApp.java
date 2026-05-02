@@ -5,6 +5,8 @@ public class QuantityMeasurementApp {
     public interface IMeasurable {
         double toBaseUnit(double value);
         double fromBaseUnit(double valueInBase);
+        double getConversionFactor();
+        String getUnitName();
     }
 
     public enum LengthUnit implements IMeasurable {
@@ -15,6 +17,8 @@ public class QuantityMeasurementApp {
 
         @Override public double toBaseUnit(double value) { return value * conversionFactor; }
         @Override public double fromBaseUnit(double valueInBase) { return valueInBase / conversionFactor; }
+        @Override public double getConversionFactor() { return conversionFactor; }
+        @Override public String getUnitName() { return name(); }
     }
 
     public enum WeightUnit implements IMeasurable {
@@ -25,16 +29,20 @@ public class QuantityMeasurementApp {
 
         @Override public double toBaseUnit(double value) { return value * conversionFactor; }
         @Override public double fromBaseUnit(double valueInBase) { return valueInBase / conversionFactor; }
+        @Override public double getConversionFactor() { return conversionFactor; }
+        @Override public String getUnitName() { return name(); }
     }
 
     public enum VolumeUnit implements IMeasurable {
-        GALLON(3.78), LITER(1.0), ML(0.001);
+        GALLON(3.78541), LITER(1.0), ML(0.001);
 
         private final double conversionFactor;
         VolumeUnit(double conversionFactor) { this.conversionFactor = conversionFactor; }
 
         @Override public double toBaseUnit(double value) { return value * conversionFactor; }
         @Override public double fromBaseUnit(double valueInBase) { return valueInBase / conversionFactor; }
+        @Override public double getConversionFactor() { return conversionFactor; }
+        @Override public String getUnitName() { return name(); }
     }
 
     public static class Quantity<U extends IMeasurable> {
@@ -44,7 +52,7 @@ public class QuantityMeasurementApp {
         public Quantity(double value, U unit) {
             if (unit == null) throw new IllegalArgumentException("Unit cannot be null");
             if (!Double.isFinite(value)) throw new IllegalArgumentException("Value must be finite");
-            this.value = Math.round(value * 100.0) / 100.0;
+            this.value = value;
             this.unit = unit;
         }
 
@@ -82,31 +90,20 @@ public class QuantityMeasurementApp {
 
         @Override
         public String toString() {
-            return value + " " + unit;
+            return String.format("%.2f %s", value, unit.getUnitName());
         }
     }
 
     public static void main(String[] args) {
-        System.out.println("Starting UC10: Generic Quantity Class with Unit Interface for Multi-Category Support");
+        System.out.println("Starting UC11: Volume Measurement Equality, Conversion, and Addition (Litre, Millilitre, Gallon)");
 
-        // Volume Tests
         Quantity<VolumeUnit> oneGallon = new Quantity<>(1.0, VolumeUnit.GALLON);
-        Quantity<VolumeUnit> threePointSevenEightLiters = new Quantity<>(3.78, VolumeUnit.LITER);
-        System.out.println("1 gallon == 3.78 liters: " + oneGallon.equals(threePointSevenEightLiters));
+        Quantity<VolumeUnit> liters = new Quantity<>(3.78541, VolumeUnit.LITER);
+        System.out.println("1 gallon == 3.78541 liters: " + oneGallon.equals(liters));
 
-        Quantity<VolumeUnit> oneLiter = new Quantity<>(1.0, VolumeUnit.LITER);
-        Quantity<VolumeUnit> thousandMl = new Quantity<>(1000.0, VolumeUnit.ML);
-        System.out.println("1 liter == 1000 ml: " + oneLiter.equals(thousandMl));
+        Quantity<VolumeUnit> sumVolume = oneGallon.add(new Quantity<>(1.0, VolumeUnit.LITER), VolumeUnit.LITER);
+        System.out.println("1 gallon + 1 liter in liters: " + sumVolume);
 
-        // Weight Tests
-        Quantity<WeightUnit> oneTonne = new Quantity<>(1.0, WeightUnit.TONNE);
-        Quantity<WeightUnit> thousandKg = new Quantity<>(1000.0, WeightUnit.KG);
-        System.out.println("1 tonne == 1000 kg: " + oneTonne.equals(thousandKg));
-
-        // Mixed category addition (Compile time error if we used proper variables, 
-        // but let's check runtime or just assume type safety works)
-        // oneGallon.add(thousandKg); // This would not compile in a real IDE.
-
-        System.out.println("UC10 Verification Complete.");
+        System.out.println("UC11 Verification Complete.");
     }
 }
