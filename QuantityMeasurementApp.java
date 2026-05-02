@@ -8,6 +8,14 @@ public class QuantityMeasurementApp {
         Unit(double conversionFactor) {
             this.conversionFactor = conversionFactor;
         }
+
+        public double toBaseUnit(double value) {
+            return value * conversionFactor;
+        }
+
+        public double fromBaseUnit(double valueInBase) {
+            return valueInBase / conversionFactor;
+        }
     }
 
     public static class Quantity {
@@ -26,12 +34,13 @@ public class QuantityMeasurementApp {
             if (this == obj) return true;
             if (obj == null || !(obj instanceof Quantity)) return false;
             Quantity that = (Quantity) obj;
-            return Math.abs(this.value * this.unit.conversionFactor - 
-                            that.value * that.unit.conversionFactor) < 1e-6;
+            return Math.abs(this.unit.toBaseUnit(this.value) - 
+                            that.unit.toBaseUnit(that.value)) < 1e-6;
         }
 
         public Quantity convertTo(Unit targetUnit) {
-            double convertedValue = (this.value * this.unit.conversionFactor) / targetUnit.conversionFactor;
+            double valueInBase = this.unit.toBaseUnit(this.value);
+            double convertedValue = targetUnit.fromBaseUnit(valueInBase);
             return new Quantity(convertedValue, targetUnit);
         }
 
@@ -42,8 +51,8 @@ public class QuantityMeasurementApp {
         public Quantity add(Quantity other, Unit targetUnit) {
             if (other == null) throw new IllegalArgumentException("Operand cannot be null");
             if (targetUnit == null) throw new IllegalArgumentException("Target unit cannot be null");
-            double sumInInches = (this.value * this.unit.conversionFactor) + (other.value * other.unit.conversionFactor);
-            double sumInTargetUnit = sumInInches / targetUnit.conversionFactor;
+            double sumInBase = this.unit.toBaseUnit(this.value) + other.unit.toBaseUnit(other.value);
+            double sumInTargetUnit = targetUnit.fromBaseUnit(sumInBase);
             return new Quantity(sumInTargetUnit, targetUnit);
         }
 
@@ -54,23 +63,15 @@ public class QuantityMeasurementApp {
     }
 
     public static void main(String[] args) {
-        System.out.println("Starting UC7: Addition with Target Unit Specification");
+        System.out.println("Starting UC8: Refactoring Unit Enum to Standalone with Conversion Responsibility");
 
         Quantity oneFoot = new Quantity(1.0, Unit.FEET);
         Quantity twelveInches = new Quantity(12.0, Unit.INCH);
 
-        // Standard add (uses first operand's unit)
-        System.out.println("1 foot + 12 inches = " + oneFoot.add(twelveInches));
+        System.out.println("1 foot == 12 inches: " + oneFoot.equals(twelveInches));
+        System.out.println("1 foot converted to inches: " + oneFoot.convertTo(Unit.INCH));
+        System.out.println("1 foot + 12 inches in yards: " + oneFoot.add(twelveInches, Unit.YARD));
 
-        // Add with target unit
-        Quantity sumInInches = oneFoot.add(twelveInches, Unit.INCH);
-        System.out.println("1 foot + 12 inches in inches = " + sumInInches);
-        System.out.println("Test sum == 24.0 in: " + sumInInches.equals(new Quantity(24.0, Unit.INCH)));
-
-        Quantity twoInches = new Quantity(2.0, Unit.INCH);
-        Quantity fiveCm = new Quantity(5.0, Unit.CM);
-        System.out.println("2 inches + 5 cm in inches = " + twoInches.add(fiveCm, Unit.INCH));
-
-        System.out.println("UC7 Verification Complete.");
+        System.out.println("UC8 Verification Complete.");
     }
 }
