@@ -88,6 +88,23 @@ public class QuantityMeasurementApp {
             return new Quantity<>(sumInTargetUnit, targetUnit);
         }
 
+        public Quantity<U> subtract(Quantity<U> other) {
+            return subtract(other, this.unit);
+        }
+
+        public Quantity<U> subtract(Quantity<U> other, U targetUnit) {
+            if (other == null) throw new IllegalArgumentException("Operand cannot be null");
+            double diffInBase = this.unit.toBaseUnit(this.value) - other.unit.toBaseUnit(other.value);
+            double diffInTargetUnit = targetUnit.fromBaseUnit(diffInBase);
+            return new Quantity<>(diffInTargetUnit, targetUnit);
+        }
+
+        public double divide(Quantity<U> other) {
+            if (other == null) throw new IllegalArgumentException("Operand cannot be null");
+            if (other.value == 0) throw new ArithmeticException("Division by zero");
+            return this.unit.toBaseUnit(this.value) / other.unit.toBaseUnit(other.value);
+        }
+
         @Override
         public String toString() {
             return String.format("%.2f %s", value, unit.getUnitName());
@@ -95,15 +112,18 @@ public class QuantityMeasurementApp {
     }
 
     public static void main(String[] args) {
-        System.out.println("Starting UC11: Volume Measurement Equality, Conversion, and Addition (Litre, Millilitre, Gallon)");
+        System.out.println("Starting UC12: Subtraction and Division Operations on Quantity Measurements");
+
+        Quantity<LengthUnit> oneFoot = new Quantity<>(1.0, LengthUnit.FEET);
+        Quantity<LengthUnit> sixInches = new Quantity<>(6.0, LengthUnit.INCH);
+
+        System.out.println("1 foot - 6 inches = " + oneFoot.subtract(sixInches));
+        System.out.println("Test 1 foot / 6 inches: " + oneFoot.divide(sixInches));
 
         Quantity<VolumeUnit> oneGallon = new Quantity<>(1.0, VolumeUnit.GALLON);
-        Quantity<VolumeUnit> liters = new Quantity<>(3.78541, VolumeUnit.LITER);
-        System.out.println("1 gallon == 3.78541 liters: " + oneGallon.equals(liters));
+        Quantity<VolumeUnit> oneLiter = new Quantity<>(1.0, VolumeUnit.LITER);
+        System.out.println("1 gallon - 1 liter = " + oneGallon.subtract(oneLiter));
 
-        Quantity<VolumeUnit> sumVolume = oneGallon.add(new Quantity<>(1.0, VolumeUnit.LITER), VolumeUnit.LITER);
-        System.out.println("1 gallon + 1 liter in liters: " + sumVolume);
-
-        System.out.println("UC11 Verification Complete.");
+        System.out.println("UC12 Verification Complete.");
     }
 }
